@@ -1,17 +1,16 @@
-# CheatGuardian: Exam Cheating Detector 🎓🔍  
-
+## Description
 CheatGuardian is a Machine Learning project that detects cheating behaviors during online exams using real-time video analysis. It leverages **TensorFlow.js, BlazeFace, and OpenCV.js** to track face movements, detect multiple faces, and analyze suspicious activity.  
 Dataset used for training was (https://www.kaggle.com/datasets/fareselmenshawii/face-detection-dataset)
 
 ---
 
 ## Features  
-✅ **Face Detection & Tracking** – Identifies and tracks students' faces during exams.  
-✅ **Multiple Face Detection** – Flags if more than one person appears on camera.  
-✅ **Head & Eye Movement Analysis** – Detects frequent looking away.  
-✅ **Audio Monitoring** – Identifies suspicious background voices.  
-✅ **Real-Time Processing** – Live alerts for detected cheating behavior.  
-✅ **Logging System** – Records flagged incidents for instructor review.  
+**Face Detection & Tracking** – Identifies and tracks students' faces during exams.  
+**Multiple Face Detection** – Flags if more than one person appears on camera.  
+**Head & Eye Movement Analysis** – Detects frequent looking away.  
+**Audio Monitoring** – Identifies suspicious background voices.  
+**Real-Time Processing** – Live alerts for detected cheating behavior.  
+**Logging System** – Records flagged incidents for instructor review.  
 
 ---
 
