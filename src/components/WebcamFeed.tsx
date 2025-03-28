@@ -2,6 +2,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
+import { Camera, CameraOff } from 'lucide-react';
 
 interface WebcamFeedProps {
   onVideoElement?: (videoElement: HTMLVideoElement | null) => void;
@@ -15,7 +16,6 @@ const WebcamFeed = ({
   status = 'safe' 
 }: WebcamFeedProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,7 +26,8 @@ const WebcamFeed = ({
           video: {
             width: { ideal: 640 },
             height: { ideal: 480 },
-            facingMode: 'user'
+            facingMode: 'user',
+            frameRate: { min: 15, ideal: 30 } // Request higher framerate for better tracking
           }
         });
         
@@ -68,11 +69,15 @@ const WebcamFeed = ({
     danger: 'border-detection-danger',
   }[status];
 
+  // Animation based on status
+  const animationClass = status !== 'safe' ? 'animate-pulse' : '';
+
   return (
     <Card className={cn(
       "w-full overflow-hidden relative transition-all duration-300", 
       borderColorClass,
-      status !== 'safe' && 'shadow-lg'
+      status !== 'safe' && 'shadow-lg',
+      status === 'danger' && animationClass
     )}>
       <CardContent className="p-0">
         {isLoading && (
@@ -84,6 +89,7 @@ const WebcamFeed = ({
         {error && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/5 z-10">
             <div className="bg-white p-4 rounded-lg max-w-xs text-center">
+              <CameraOff className="h-8 w-8 mx-auto mb-2 text-detection-danger" />
               <p className="text-red-500">{error}</p>
               <button 
                 className="mt-2 px-4 py-2 bg-primary text-primary-foreground rounded-md"
@@ -95,6 +101,16 @@ const WebcamFeed = ({
           </div>
         )}
         
+        {/* Status overlay */}
+        {status !== 'safe' && (
+          <div className={cn(
+            "absolute top-2 right-2 z-20 px-3 py-1 rounded-full text-white text-sm font-medium",
+            status === 'warning' ? "bg-detection-warning" : "bg-detection-danger"
+          )}>
+            {status === 'warning' ? 'Warning' : 'Alert'}
+          </div>
+        )}
+        
         <video 
           ref={videoRef}
           autoPlay 
@@ -103,9 +119,9 @@ const WebcamFeed = ({
           className="w-full h-auto" 
         />
         
-        {showDetectionOverlay && (
+        {!isLoading && !error && showDetectionOverlay && (
           <canvas 
-            ref={canvasRef}
+            id="detection-overlay"
             className="absolute top-0 left-0 w-full h-full pointer-events-none" 
             width={640}
             height={480}

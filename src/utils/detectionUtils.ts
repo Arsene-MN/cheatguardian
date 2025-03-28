@@ -1,4 +1,3 @@
-
 import * as tf from '@tensorflow/tfjs';
 import * as blazeface from '@tensorflow-models/blazeface';
 
@@ -12,11 +11,16 @@ interface HeadPosition {
   timestamp: number;
 }
 
+// Enhanced constants for better detection
 const recentHeadPositions: HeadPosition[] = [];
-const MAX_HEAD_POSITIONS = 10; // Track last 10 positions
-const HEAD_MOVEMENT_THRESHOLD = 30; // Pixel threshold for significant movement
-const FREQUENT_MOVEMENTS_THRESHOLD = 3; // Number of significant movements to consider "frequent"
-const POSITION_TRACKING_INTERVAL = 500; // Record position every 500ms
+const MAX_HEAD_POSITIONS = 15; // Increased from 10 to 15 for better movement tracking
+const HEAD_MOVEMENT_THRESHOLD = 25; // Lowered from 30 to 25 for higher sensitivity
+const FREQUENT_MOVEMENTS_THRESHOLD = 3; // Keep at 3 significant movements
+const POSITION_TRACKING_INTERVAL = 300; // Decreased from 500ms to 300ms for more frequent sampling
+
+// New constants for face size and position tracking
+const FACE_DISAPPEARANCE_THRESHOLD = 3; // Number of consecutive frames without a face to trigger warning
+let framesSinceFaceDetected = 0;
 
 /**
  * Initialize the face detection model
@@ -26,7 +30,11 @@ export const initializeDetection = async (): Promise<void> => {
     // Load model if not already loaded
     if (!faceDetectionModel) {
       console.log('Loading face detection model...');
-      faceDetectionModel = await blazeface.load();
+      faceDetectionModel = await blazeface.load({
+        maxFaces: 3, // Detect up to 3 faces in frame
+        iouThreshold: 0.3, // Lower threshold for better detection of multiple faces
+        scoreThreshold: 0.6, // Lower threshold to catch more potential faces
+      });
       console.log('Face detection model loaded');
     }
   } catch (error) {
@@ -36,7 +44,7 @@ export const initializeDetection = async (): Promise<void> => {
 };
 
 /**
- * Process a video frame to detect faces
+ * Process a video frame to detect faces with enhanced sensitivity
  */
 export const processVideoFrame = async (
   videoElement: HTMLVideoElement | null
@@ -58,11 +66,26 @@ export const processVideoFrame = async (
   }
 
   try {
-    // Run detection
-    const predictions = await faceDetectionModel.estimateFaces(videoElement, false);
+    // Enhanced detection with multiple runs for better accuracy
+    let predictions = await faceDetectionModel.estimateFaces(videoElement, false);
+    
+    // If no faces detected on first try, attempt a second pass with different settings
+    if (predictions.length === 0) {
+      // Try again with a different tensor input format
+      const imageTensor = tf.browser.fromPixels(videoElement);
+      predictions = await faceDetectionModel.estimateFaces(imageTensor, false);
+      imageTensor.dispose(); // Clean up tensor
+    }
     
     const faceCount = predictions.length;
     const facePresent = faceCount > 0;
+    
+    // Update consecutive frames without a face counter
+    if (!facePresent) {
+      framesSinceFaceDetected++;
+    } else {
+      framesSinceFaceDetected = 0;
+    }
     
     // Track head position for the primary face (if present)
     let lookingAway = false;
@@ -116,6 +139,9 @@ export const processVideoFrame = async (
           }
         }
       }
+    } else {
+      // If no face is present, attention is 0
+      estimatedAttention = 0;
     }
     
     return {
@@ -138,7 +164,7 @@ export const processVideoFrame = async (
 };
 
 /**
- * Get the current detection status
+ * Get the current detection status with enhanced criteria
  */
 export const getDetectionStatus = (
   facePresent: boolean, 
@@ -148,7 +174,8 @@ export const getDetectionStatus = (
   status: 'safe' | 'warning' | 'danger';
   message: string;
 } => {
-  if (!facePresent) {
+  // Face has been missing for several consecutive frames
+  if (!facePresent && framesSinceFaceDetected >= FACE_DISAPPEARANCE_THRESHOLD) {
     return {
       status: 'danger',
       message: 'No face detected in frame',
@@ -166,6 +193,14 @@ export const getDetectionStatus = (
     return {
       status: 'warning',
       message: 'Looking away from screen frequently',
+    };
+  }
+  
+  // Short-term face disappearance (less than threshold) - warning level
+  if (!facePresent && framesSinceFaceDetected > 0) {
+    return {
+      status: 'warning',
+      message: 'Face temporarily not visible',
     };
   }
   

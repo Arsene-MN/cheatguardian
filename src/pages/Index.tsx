@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Shield, Clipboard, Settings, Github } from 'lucide-react';
+import { Shield, Clipboard, Settings, Github, Mic, MicOff } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,6 +13,11 @@ import {
   getDetectionStatus,
   drawDetections
 } from '@/utils/detectionUtils';
+import {
+  initializeAudio,
+  processAudio,
+  stopAudio
+} from '@/utils/audioUtils';
 
 const Index = () => {
   // References
@@ -29,6 +34,11 @@ const Index = () => {
   const [estimatedAttention, setEstimatedAttention] = useState(100);
   const [detectionStatus, setDetectionStatus] = useState<'safe' | 'warning' | 'danger'>('safe');
   const [statusMessage, setStatusMessage] = useState('Starting detection...');
+  
+  // Audio detection state
+  const [audioEnabled, setAudioEnabled] = useState(false);
+  const [noiseDetected, setNoiseDetected] = useState(false);
+  const [volumeLevel, setVolumeLevel] = useState(0);
   
   // Alerts state
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -66,12 +76,34 @@ const Index = () => {
     loadModel();
   }, []);
   
+  // Initialize audio detection
+  const toggleAudio = async () => {
+    if (audioEnabled) {
+      stopAudio();
+      setAudioEnabled(false);
+      toast({
+        title: 'Audio Monitoring Disabled',
+        description: 'Audio detection has been turned off.',
+      });
+    } else {
+      const initialized = await initializeAudio();
+      setAudioEnabled(initialized);
+      if (initialized) {
+        toast({
+          title: 'Audio Monitoring Enabled',
+          description: 'The system will now detect suspicious sounds.',
+        });
+      }
+    }
+  };
+  
   // Start or stop detection loop
   useEffect(() => {
     const detectFrame = async () => {
       if (!videoRef.current || !isDetecting || !isModelLoaded) return;
       
       try {
+        // Process video frame
         const results = await processVideoFrame(videoRef.current);
         
         // Update state with detection results
@@ -80,12 +112,48 @@ const Index = () => {
         setLookingAway(results.lookingAway);
         setEstimatedAttention(results.estimatedAttention);
         
-        // Get overall detection status
-        const status = getDetectionStatus(
+        // Process audio if enabled
+        if (audioEnabled) {
+          const audioResults = processAudio();
+          setNoiseDetected(audioResults.noiseDetected);
+          setVolumeLevel(audioResults.volumeLevel);
+          
+          // Add alert for suspicious audio
+          if (audioResults.noiseDetected) {
+            const shouldAddAlert = !alerts.some(
+              alert => alert.message === 'Suspicious sounds detected' && 
+                      (new Date().getTime() - alert.timestamp.getTime()) < 10000
+            );
+            
+            if (shouldAddAlert) {
+              setAlerts(prev => [
+                {
+                  id: `alert-${Date.now()}`,
+                  message: 'Suspicious sounds detected',
+                  type: 'warning',
+                  timestamp: new Date()
+                },
+                ...prev
+              ]);
+            }
+          }
+        }
+        
+        // Determine overall detection status
+        let status = getDetectionStatus(
           results.facePresent,
           results.faceCount,
           results.lookingAway
         );
+        
+        // Update status if audio problems detected
+        if (audioEnabled && noiseDetected && status.status === 'safe') {
+          status = {
+            status: 'warning',
+            message: 'Suspicious audio detected'
+          };
+        }
+        
         setDetectionStatus(status.status);
         setStatusMessage(status.message);
         
@@ -137,7 +205,7 @@ const Index = () => {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isDetecting, isModelLoaded, alerts]);
+  }, [isDetecting, isModelLoaded, audioEnabled, noiseDetected, alerts]);
   
   // Handle dismissing an alert
   const dismissAlert = (id: string) => {
@@ -166,8 +234,22 @@ const Index = () => {
         title: 'Detection Paused',
         description: 'Monitoring is currently paused.',
       });
+      // Also stop audio monitoring when stopping detection
+      if (audioEnabled) {
+        stopAudio();
+        setAudioEnabled(false);
+      }
     }
   };
+  
+  // Clean up resources when component unmounts
+  useEffect(() => {
+    return () => {
+      if (audioEnabled) {
+        stopAudio();
+      }
+    };
+  }, [audioEnabled]);
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -188,6 +270,26 @@ const Index = () => {
             >
               <Github className="h-5 w-5" />
             </a>
+            {isDetecting && (
+              <Button
+                onClick={toggleAudio}
+                variant="outline"
+                size="sm"
+                className={audioEnabled ? "text-detection-info" : ""}
+              >
+                {audioEnabled ? (
+                  <>
+                    <Mic className="h-4 w-4 mr-2" />
+                    Audio On
+                  </>
+                ) : (
+                  <>
+                    <MicOff className="h-4 w-4 mr-2" />
+                    Audio Off
+                  </>
+                )}
+              </Button>
+            )}
             <Button variant="outline" size="sm">
               <Settings className="h-4 w-4 mr-2" />
               Settings
@@ -256,6 +358,8 @@ const Index = () => {
               faceCount={faceCount}
               lookingAway={lookingAway}
               estimatedAttention={estimatedAttention}
+              noiseDetected={audioEnabled ? noiseDetected : undefined}
+              volumeLevel={audioEnabled ? volumeLevel : undefined}
               status={detectionStatus}
               statusMessage={statusMessage}
             />
@@ -279,11 +383,12 @@ const Index = () => {
                       <li>Face disappearance from the frame</li>
                       <li>Frequent looking away from the screen</li>
                       <li>Unusual head movements</li>
+                      {audioEnabled && <li>Suspicious sounds or conversations</li>}
                     </ul>
                   </div>
                   
                   <p className="text-muted-foreground">
-                    All processing happens locally in your browser - no video is uploaded or stored.
+                    All processing happens locally in your browser - no video or audio is uploaded or stored.
                   </p>
                 </div>
               </CardContent>

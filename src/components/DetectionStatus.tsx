@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { Shield, Check, AlertTriangle, AlertCircle, Eye, Users, Brain } from 'lucide-react';
+import { Shield, Check, AlertTriangle, AlertCircle, Eye, Users, Brain, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { 
@@ -62,6 +62,8 @@ interface DetectionStatusProps {
   faceCount: number;
   lookingAway: boolean;
   estimatedAttention: number;
+  noiseDetected?: boolean;
+  volumeLevel?: number;
   status: 'safe' | 'warning' | 'danger';
   statusMessage: string;
 }
@@ -71,6 +73,8 @@ const DetectionStatus = ({
   faceCount,
   lookingAway,
   estimatedAttention,
+  noiseDetected = false,
+  volumeLevel = 0,
   status,
   statusMessage
 }: DetectionStatusProps) => {
@@ -162,6 +166,17 @@ const DetectionStatus = ({
             }
             tooltip="Estimated attention level based on behavior"
           />
+          
+          {/* Add Audio Monitoring */}
+          {volumeLevel !== undefined && (
+            <StatusItem 
+              icon={<Volume2 className="h-4 w-4" />}
+              label="Audio Activity"
+              value={noiseDetected ? "Suspicious" : "Normal"}
+              status={noiseDetected ? "warning" : "safe"}
+              tooltip="Detects suspicious audio patterns like conversations"
+            />
+          )}
         </div>
       </CardContent>
     </Card>
