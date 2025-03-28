@@ -1,69 +1,48 @@
-# Welcome to your Lovable project
+# CheatGuardian: Exam Cheating Detector 🎓🔍  
 
-## Project info
+CheatGuardian is a Machine Learning project that detects cheating behaviors during online exams using real-time video analysis. It leverages **TensorFlow.js, BlazeFace, and OpenCV.js** to track face movements, detect multiple faces, and analyze suspicious activity.  
+Dataset used for training was (https://www.kaggle.com/datasets/fareselmenshawii/face-detection-dataset)
 
-**URL**: https://lovable.dev/projects/28046136-fd58-471e-9e06-7445a8711dd8
+---
 
-## How can I edit this code?
+## 🚀 Features  
+✅ **Face Detection & Tracking** – Identifies and tracks students' faces during exams.  
+✅ **Multiple Face Detection** – Flags if more than one person appears on camera.  
+✅ **Head & Eye Movement Analysis** – Detects frequent looking away.  
+✅ **Audio Monitoring** – Identifies suspicious background voices.  
+✅ **Real-Time Processing** – Live alerts for detected cheating behavior.  
+✅ **Logging System** – Records flagged incidents for instructor review.  
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## 🛠 Tech Stack  
+- **Frontend:** React.js(Vite), Shadcn UI 
+- **Backend:** Express.js  
+- **AI Models:** TensorFlow.js, BlazeFace (for face detection), OpenCV.js  
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/28046136-fd58-471e-9e06-7445a8711dd8) and start prompting.
+## 📦 Installation  
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
+### 1️⃣ Clone the Repository  
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+https://github.com/Arsene-MN/cheatguardian
+cd cheatguardian
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### 2️⃣ Install dependencies
+```sh
+npm install --legacy-peer-deps
+```
+### 3️⃣ Run the project
+```sh
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first
+to discuss what you would like to change.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Please make sure to update tests as appropriate.
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/28046136-fd58-471e-9e06-7445a8711dd8) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+## Demo
+[Watch the demo video](https://youtu.be/32sd7H9SooY)
