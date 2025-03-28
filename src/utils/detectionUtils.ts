@@ -1,3 +1,4 @@
+
 import * as tf from '@tensorflow/tfjs';
 import * as blazeface from '@tensorflow-models/blazeface';
 
@@ -214,7 +215,13 @@ export const drawDetections = (
     // Draw face landmarks if available
     if (prediction.landmarks) {
       ctx.fillStyle = '#3b82f6';
-      prediction.landmarks.forEach((landmark) => {
+      // Convert landmarks to array if it's a tensor
+      const landmarksArray = Array.isArray(prediction.landmarks) 
+        ? prediction.landmarks 
+        : prediction.landmarks.arraySync();
+        
+      // Now we can safely use forEach
+      landmarksArray.forEach((landmark) => {
         ctx.beginPath();
         ctx.arc(
           landmark[0] * scaleX, 

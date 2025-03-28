@@ -8,7 +8,7 @@ import { toast } from '@/components/ui/use-toast';
 export interface Alert {
   id: string;
   message: string;
-  type: 'warning' | 'danger';
+  type: 'warning' | 'danger' | 'safe';  // Modified to include 'safe' type
   timestamp: Date;
 }
 
