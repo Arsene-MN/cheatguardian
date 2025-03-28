@@ -263,7 +263,7 @@ const Index = () => {
           
           <div className="flex items-center gap-3">
             <a
-              href="https://github.com/your-repo/cheatguardian"
+              href="https://github.com/Arsene-MN/cheatguardian"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground"
