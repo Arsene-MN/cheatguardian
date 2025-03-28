@@ -5,7 +5,7 @@ Dataset used for training was (https://www.kaggle.com/datasets/fareselmenshawii/
 
 ---
 
-## 🚀 Features  
+## Features  
 ✅ **Face Detection & Tracking** – Identifies and tracks students' faces during exams.  
 ✅ **Multiple Face Detection** – Flags if more than one person appears on camera.  
 ✅ **Head & Eye Movement Analysis** – Detects frequent looking away.  
@@ -15,25 +15,25 @@ Dataset used for training was (https://www.kaggle.com/datasets/fareselmenshawii/
 
 ---
 
-## 🛠 Tech Stack  
+## Tech Stack  
 - **Frontend:** React.js(Vite), Shadcn UI 
 - **Backend:** Express.js  
 - **AI Models:** TensorFlow.js, BlazeFace (for face detection), OpenCV.js  
 ---
 
-## 📦 Installation  
+## Installation  
 
-### 1️⃣ Clone the Repository  
+### Clone the Repository  
 ```sh
 https://github.com/Arsene-MN/cheatguardian
 cd cheatguardian
 ```
 
-### 2️⃣ Install dependencies
+### Install dependencies
 ```sh
 npm install --legacy-peer-deps
 ```
-### 3️⃣ Run the project
+### Run the project
 ```sh
 npm run dev
 ```
@@ -43,6 +43,3 @@ Pull requests are welcome. For major changes, please open an issue first
 to discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
-
-## Demo
-[Watch the demo video](https://youtu.be/32sd7H9SooY)
