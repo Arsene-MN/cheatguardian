@@ -36,6 +36,8 @@ npm install --legacy-peer-deps
 ```sh
 npm run dev
 ```
+## Demo
+[Watch the demo here!](https://youtu.be/32sd7H9SooY)
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first
